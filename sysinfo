@@ -9,7 +9,18 @@
 user=$USER@
 OS="$(uname -sr)"
 #Desktop="${XDG_CURRENT_DESKTOP}"
-WM="$(pgrep -l wm |cut -d " " -f2)"
+
+# Check if the WM is EWHM complient
+WM_ID=$(xprop -root | grep ^_NET_SUPPORTING_WM_CHECK | awk '{ print $NF }')
+
+# If so, WM_ID is set to the window containing the WM name in the _NET_WM_NAME atom
+[ ! -z "$WM_ID" ] \
+    && WM=$(xprop -id $WM_ID | grep ^_NET_WM_NAME | cut -d'"' -f2)
+
+# Fallback
+[ -z "$WM" ] \
+    && WM="$(pgrep -l wm |cut -d " " -f2)"
+
 Kernel="$(uname -v)"
 Uptime="$(uptime |awk '{print $3, $4}')"
 Packages="$(pkg_info | wc -l)"
